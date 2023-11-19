@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+    <html lang="ru">
+    <head>
+        <meta charset="UTF-8">
+        <title>Game of Life</title>
+        <link rel="stylesheet" href="style.css">
+        <script defer src="index.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Game of Life</h1>
+                <div class="inputs">
+                    <div class="input">
+                        <label for="grid-size">Enter Grid size(>=4):</label>
+                        <input type="number" id="grid-size" value="5" />
+                        <button id="btn-generate-grid"> Generate grid </button>
+                    </div>
+                    <div class="input">
+                        <label>1st Generation creation:</label>
+                        <button id="first-generaton">Generate randomly</button>
+                        or pick cells by clicking
+                    </div>
+                    <div class="input" id="manual-generation">
+                        <button id="start">Start</button>
+                    </div>
+                </div>
+                <div id="grid"></div>
+        </div>
+    </body>
+</html>

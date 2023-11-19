@@ -1,0 +1,48 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.inputs {
+    margin: 20px;
+}
+
+.input {
+    display: flex;
+    justify-content: left;
+    margin: 10px 0;
+    
+}
+.input label,.input button, .input input{
+    margin: 0 10px;
+}
+.input input[type=number] {
+    width: 70px;
+}
+
+#grid {
+
+    width: 200px;
+    /* flex-wrap: wrap;
+
+    /* display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    margin: 20px;*/
+} 
+
+#grid div {
+    border: 1px dotted gray;
+    width: 20px;
+    height: 20px;
+
+    display: inline-block;
+    margin: 0 2px;
+}
+
+#grid div.alive {
+    background-color: red;
+}
