@@ -62,21 +62,30 @@ function getNeighboursIndeces(index) {
     ].map(([x,y]) => getIndex(x,y));
 }
 
-function makeNewGeneration(){
-
+function makeGenerationHash(generation) {
+    const binnaryArray=Array.from({ length: SIZEXSIZE }).map((_,i)=> '0');
+    for(let i =0; i < generation.length; i++) {
+        binnaryArray[parseInt(generation[i])]='1';
+    }
+    const binaryString = binnaryArray.join('');
+    const number = parseInt(binaryString, 2).toString(36);
+    console.log("binaryString",binaryString, number);
+    return number;
 }
 
-function willBeAlive(neighbourIndeces){
+function willBeAlive(isAliveNow, neighbourIndeces){
     let aliveNeighbours = 0;
     for (let neighborIndex = 0; neighborIndex < neighbourIndeces.length; neighborIndex++) {
         
         if (getCurrentStatus(neighbourIndeces[neighborIndex])) {
             aliveNeighbours++;
         }
-        if (aliveNeighbours >= 3) {
-            return true;
+        if (aliveNeighbours > 3) {
+            break;
         }
-    }
+    } 
+    if (!isAliveNow && aliveNeighbours === 3) return true;
+    if (isAliveNow && aliveNeighbours <=3 && aliveNeighbours>=2) return true;
     return false;
 }
 
@@ -103,29 +112,28 @@ function onStartClick(){
         while (checkStack.length > 0) {
             const currentIndex = checkStack.pop();
             if (checked[currentIndex]) continue;
-
+            checked[currentIndex] = true;
+            
             const neighbourIndeces = getNeighboursIndeces(currentIndex);
-            const willBeAliveOnNextGen = willBeAlive(neighbourIndeces);
-
-            // state alive doesnt change in new generation for the cell
-            if (getCurrentStatus(currentIndex) === willBeAliveOnNextGen) {
-                continue;
-            }
+            const willBeAliveOnNextGen = willBeAlive(getCurrentStatus(currentIndex), neighbourIndeces);
 
             if (willBeAliveOnNextGen) {
                 nextAliveGenerations.push(currentIndex);
+            } 
+            
+            if (getCurrentStatus(currentIndex) === false && willBeAliveOnNextGen === false) {
+                continue;
+            }
 
-            } else {
+            if (!willBeAliveOnNextGen) {
                 nextDeadGenerations.push(currentIndex);
             }
-            
 
-            checked[currentIndex] = true;
             checkStack.push(...neighbourIndeces);
         }
     }
     console.log("nextAliveGenerations", nextAliveGenerations);
-    generations.push(currentGeneration);
+    generations.push(makeGenerationHash(currentGeneration));
     currentGeneration = nextAliveGenerations;
     applyNewGeneration(nextAliveGenerations, nextDeadGenerations);
 }
@@ -147,11 +155,16 @@ function onCellClick(e){
     const cell = e.target;
     const i = cell.dataset.index;
     const isAlive = cell.dataset.alive === "true";
-    makeAliveOrDead(i, isAlive);
+    makeAliveOrDead(i, !isAlive);
 }
 
 function onBtnGenerateGridClick(){
+    isManualPickMode = true;
     SIZE =  parseInt($inputGridSize.value);
+    if (SIZE < 5) {
+        alert("Grid size should be >= 5");
+        return;
+    } 
     SIZEXSIZE = SIZE*SIZE; 
     $grid.style.gridTemplateColumns = `repeat(${SIZE}, 1fr)`;
     $grid.style.gridTemplateRows = `repeat(${SIZE}, 1fr)`;
