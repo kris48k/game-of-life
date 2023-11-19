@@ -193,9 +193,6 @@ function createGrid($container, size) {
     console.log("before:createGrid", (new Date()).getTime());
     const buffer = [];
     for (let i = 0; i < SIZEXSIZE; i++) {
-        //const el = document.createElement('div');
-        //el.dataset.index = i;
-        //$container.appendChild(el);
         buffer.push(cellTemplate(i));
     }
     const t =  (new Date()).getTime();
@@ -204,40 +201,6 @@ function createGrid($container, size) {
     console.log("after:innerHTML:createGrid", (new Date()).getTime(), (new Date()).getTime()-t);
 }
 
-function createGridWithElements($container, size) {
-    const b = (new Date()).getTime();
-    console.log("before:createGrid", (new Date()).getTime());
-    const buffer = [];
-    for (let i = 0; i < SIZEXSIZE; i++) {
-        const el = document.createElement('div');
-        el.dataset.index = i;
-        $container.appendChild(el);
-       
-    }
-    const t =  (new Date()).getTime();
-    console.log("before:innerHTML:createGrid", t, t-b);
-    console.log("after:innerHTML:createGrid", (new Date()).getTime(), (new Date()).getTime()-t);
-}
-
-
-function createGridWithFragment($container, size) {
-    const b = (new Date()).getTime();
-    console.log("before:createGrid", (new Date()).getTime());
-    const buffer = [];
-    const fragment = new DocumentFragment();
-    for (let i = 0; i < SIZEXSIZE; i++) {
-        const el = document.createElement('div');
-        el.dataset.index = i;
-        fragment.appendChild(el);
-        //$container.appendChild(el);
-        //buffer.push(cellTemplate(i));
-    }
-    const t =  (new Date()).getTime();
-    console.log("before:innerHTML:createGrid", t, t-b);
-    //$container.innerHTML = buffer.join('');
-    $container.append(fragment);
-    console.log("after:innerHTML:createGrid", (new Date()).getTime(), (new Date()).getTime()-t);
-}
 
 function cellTemplate(index) {
     return `<div data-index=${index}></div>`
