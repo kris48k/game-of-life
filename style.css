@@ -2,6 +2,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 200px;
+    right: 0;
+    border: 1px solid greenyellow;
+    min-width: 800px;
+    overflow-y: scroll;
 }
 
 .inputs {
@@ -21,17 +30,7 @@
     width: 70px;
 }
 
-#grid {
-
-    width: 200px;
-    /* flex-wrap: wrap;
-
-    /* display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    grid-column-gap: 0px;
-    grid-row-gap: 0px;
-    margin: 20px;*/
+#grid {    
 } 
 
 #grid div {
@@ -41,8 +40,21 @@
 
     display: inline-block;
     margin: 0 2px;
+    box-sizing: border-box; /*TODO: check if it layouts and paints faster without it*/
 }
 
 #grid div.alive {
     background-color: red;
+}
+
+#logs {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 200px;
+    border: 1px solid gray;
+    padding: 10px;
+    box-sizing: border-box; 
+     
 }
