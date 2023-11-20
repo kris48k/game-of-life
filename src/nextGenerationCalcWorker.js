@@ -4,6 +4,7 @@ let currentGeneration = [];
 
 let SIZE;
 let SIZEXSIZE;
+let AUTOGENERATION_INTERVAL;
 
 onmessage = function(e){
     const {_SIZE, _SIZEXSIZE, _currentGeneration, reset } = e.data;

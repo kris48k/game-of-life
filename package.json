@@ -1,0 +1,22 @@
+{
+  "name": "game-of-life",
+  "version": "1.0.0",
+  "description": "Pure JS implementation of [Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life)",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx ws"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kris48k/game-of-life.git"
+  },
+  "author": "Kristina K.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kris48k/game-of-life/issues"
+  },
+  "homepage": "https://github.com/kris48k/game-of-life#readme",
+  "dependencies": {
+    "local-web-server": "^5.3.0"
+  }
+}

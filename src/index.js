@@ -1,3 +1,5 @@
+import { settings } from "./settings.js";
+
 let $btnGenerateGrid;
 let $btnGenerateRandom;
 let $btnNextGeneration;
@@ -10,16 +12,9 @@ let $currentGeneration;
 
 let SIZE;
 let SIZEXSIZE;
-let isGenerating = false;
-
-const ALIVE_RANDOM_CHANCE = 0.3;
 
 let currentGeneration = [];
 
-const timers={
-    FIRST_RANDOM_GENERATION_START: 0,
-    FIRST_RANDOM_GENERATION_END: 0,
-};
 
 /* 
 0 - beggining state
@@ -37,13 +32,14 @@ let generations = [];
 let nextAliveGenerations = [];
 let nextDeadGenerations = [];
 
-const NEXT_GENERATION_TIMEOUT = 1000;
+const AUTOGENERATION_INTERVAL = 1000;
+let AUTOGENERATION_INTERVAL_ID;
 
 if (!window.Worker) {
     alert("Please choose the modern browser that support workers.");
 }
 
-const nextGenerationCalcWorker = new Worker("nextGenerationCalcWorker.js");
+const nextGenerationCalcWorker = new Worker("src/nextGenerationCalcWorker.js");
 
 nextGenerationCalcWorker.onmessage = function(e) {
     const {            
@@ -104,6 +100,7 @@ function makeNextGeneration(){
     if (SIZE > 300) {
         $currentGeneration.innerText = `working on generation #${generations.length+1}`;
     }
+    addLogs(`<b>Working on generation #${generations.length+1}</b>.`);
     nextGenerationCalcWorker.postMessage({
         _currentGeneration: currentGeneration,
         _SIZE: SIZE,  
@@ -154,8 +151,6 @@ function onBtnGenerateGridClick(){
     
     const gridWidth = (20+4)*SIZE;
     $grid.style.width = `${gridWidth}px`;
-
-    currentGenerationFull = new Array({ length: SIZEXSIZE }).map(_=>false);
     
     createGrid($grid, SIZE);
 }
@@ -168,7 +163,7 @@ function onBtnGenerateRandomClick(){
         setTimeout((chunkStart)=>{
             const length = Math.min(chunkStart+chunks , SIZEXSIZE);
             for (let j = chunkStart; j < length; j++) {
-                if (Math.random() < ALIVE_RANDOM_CHANCE) {
+                if (Math.random() < settings.ALIVE_RANDOM_CHANCE) {
                     makeAliveOrDead(j, true, true);
                 } else {
                     makeAliveOrDead(j, false, true);
@@ -184,9 +179,22 @@ function onBtnGenerateRandomClick(){
 }
 
 function onBtnAutoGenerateClick(){
-    APP_STATE = 3; 
     $btnGenerateRandom.disabled = true;
-    //todo
+
+    if (APP_STATE === 3) {
+        clearInterval(AUTOGENERATION_INTERVAL_ID);
+        $btnAutogenerate.innerText = "Start Autogenerate";
+        $btnNextGeneration.disabled = false;
+        APP_STATE = 2;
+        return;
+    }
+
+    APP_STATE = 3; 
+    $btnAutogenerate.innerText = "Stop Autogenerate";
+    $btnNextGeneration.disabled = true;
+    AUTOGENERATION_INTERVAL_ID = setInterval(()=>{
+        makeNextGeneration();
+    }, AUTOGENERATION_INTERVAL);
 }
 
 /* For the first generation we need to push into currentGeneration */
@@ -232,8 +240,9 @@ function cellTemplate(index) {
 
 function addLogs(message) {
     const newElement = document.createElement('p');
-    newElement.innerText = message;
+    newElement.innerHTML = message;
     $logs.appendChild(newElement);
+    //$logs.scrollTop = $logs.scrollHeight;
 }
 
 function now() {

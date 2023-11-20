@@ -10,7 +10,7 @@
     right: 0;
     border: 1px solid greenyellow;
     min-width: 800px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .inputs {
@@ -56,5 +56,5 @@
     border: 1px solid gray;
     padding: 10px;
     box-sizing: border-box; 
-     
+    overflow-y: auto;
 }
