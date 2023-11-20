@@ -17,11 +17,15 @@
                     </div>
                     <div class="input">
                         <label>1st Generation creation:</label>
-                        <button id="first-generaton">Generate randomly</button>
+                        <button id="btn-generate-random" disabled>Generate randomly</button>
                         or pick cells by clicking
                     </div>
                     <div class="input" id="manual-generation">
-                        <button id="start">Start</button>
+                        <label>Make the</label><button id="btn-next-generation" disabled>Next generation</button>
+                        <label>or</label><button id="btn-autogenerate" disabled>Autogenerate</button>
+                    </div>
+                    <div class="input">
+                        <label>Current generation: <span id="current-generation"></span></label>
                     </div>
                 </div>
                 <div id="grid"></div>

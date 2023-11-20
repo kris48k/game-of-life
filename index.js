@@ -1,13 +1,14 @@
 let $btnGenerateGrid;
+let $btnGenerateRandom;
+let $btnNextGeneration;
+let $btnAutogenerate;
+
 let $inputGridSize;
-let $btn1stgeneration;
-let $btnStart;
 let $grid;
 let $logs;
 
 let SIZE;
 let SIZEXSIZE;
-let isManualPickMode = true;
 let isGenerating = false;
 
 const ALIVE_RANDOM_CHANCE = 0.3;
@@ -18,6 +19,15 @@ const timers={
     FIRST_RANDOM_GENERATION_START: 0,
     FIRST_RANDOM_GENERATION_END: 0,
 };
+
+/* 
+0 - beggining state
+1 - picking first generaton
+2 - choose next generation
+3 - autogeneration
+*/
+let APP_STATE = 0; 
+
 
 
 /* here we store all previous generations */
@@ -56,19 +66,24 @@ nextGenerationCalcWorker.onmessage = function(e) {
   
 document.addEventListener('DOMContentLoaded', function(){
     $btnGenerateGrid = document.getElementById("btn-generate-grid");
+    $btnGenerateGrid.addEventListener('click',onBtnGenerateGridClick);
+
+    $btnGenerateRandom = document.getElementById("btn-generate-random");
+    $btnGenerateRandom.addEventListener('click',onBtnGenerateRandomClick);
+
+    $btnNextGeneration = document.getElementById("btn-next-generation");
+    $btnNextGeneration.addEventListener('click', onBtnNextGenerationClick, false);
+    
+    $btnAutogenerate = document.getElementById('btn-autogenerate');
+    $btnAutogenerate.addEventListener('click', onBtnAutoGenerateClick, false);
+    
     $inputGridSize = document.getElementById("grid-size");
-    $btn1stgeneration = document.getElementById("first-generaton");
 
     $grid = document.getElementById("grid");
-    $btnStart = document.getElementById("start");
+    $grid.addEventListener('click', onCellClick, false);
     $logs = document.getElementById("logs");
 
-    $btnGenerateGrid.addEventListener('click',onBtnGenerateGridClick);
-    $btn1stgeneration.addEventListener('click',onBtnFirstGenerationClick);
-    $grid.addEventListener('click', onCellClick, false);
-    $btnStart.addEventListener('click', onStartClick, false);
 });
-
 
 // TODO
 function makeGenerationHash(generation) {
@@ -81,17 +96,19 @@ function makeGenerationHash(generation) {
     return number;
 }
 
-
-function getCurrentStatus(index) {
-    return $grid.children[index].dataset.alive === "true";
-}
-
-function onStartClick(){
+function makeNextGeneration(){
     nextGenerationCalcWorker.postMessage({
         _currentGeneration: currentGeneration,
         _SIZE: SIZE,  
         _SIZEXSIZE: SIZEXSIZE
     });
+}
+
+function onBtnNextGenerationClick(){
+    APP_STATE = 2; 
+    $btnGenerateRandom.disabled = true;
+
+    makeNextGeneration();
 }
 
 function applyNewGeneration(nextAliveGenerations, nextDeadGenerations){
@@ -105,7 +122,7 @@ function applyNewGeneration(nextAliveGenerations, nextDeadGenerations){
 }
 
 function onCellClick(e){
-    if (!isManualPickMode) return;
+    if (APP_STATE !== 1) return; 
 
     const cell = e.target;
     const i = cell.dataset.index;
@@ -114,7 +131,13 @@ function onCellClick(e){
 }
 
 function onBtnGenerateGridClick(){
-    isManualPickMode = true;
+    APP_STATE = 1;
+    $btnGenerateGrid.disabled = true;
+    $btnGenerateRandom.disabled = false;
+    $btnNextGeneration.disabled = false;
+    $btnAutogenerate.disabled = false;
+    
+
     SIZE =  parseInt($inputGridSize.value);
     if (SIZE < 5) {
         alert("Grid size should be >= 5");
@@ -130,15 +153,12 @@ function onBtnGenerateGridClick(){
     createGrid($grid, SIZE);
 }
 
-function onBtnFirstGenerationClick(){
+function onBtnGenerateRandomClick(){
     const startTime = now();
     const chunks = 10000;
     currentGeneration = [];
     for (let i = 0; i < SIZEXSIZE; i+=chunks) {
         setTimeout((chunkStart)=>{
-            console.log(
-                "in setTimeout", chunkStart
-            );
             const length = Math.min(chunkStart+chunks , SIZEXSIZE);
             for (let j = chunkStart; j < length; j++) {
                 if (Math.random() < ALIVE_RANDOM_CHANCE) {
@@ -154,6 +174,12 @@ function onBtnFirstGenerationClick(){
         }, 0, i);
        
     }
+}
+
+function onBtnAutoGenerateClick(){
+    APP_STATE = 3; 
+    $btnGenerateRandom.disabled = true;
+    //todo
 }
 
 /* For the first generation we need to push into currentGeneration */
