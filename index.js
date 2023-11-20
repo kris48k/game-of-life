@@ -6,6 +6,7 @@ let $btnAutogenerate;
 let $inputGridSize;
 let $grid;
 let $logs;
+let $currentGeneration;
 
 let SIZE;
 let SIZEXSIZE;
@@ -60,6 +61,7 @@ nextGenerationCalcWorker.onmessage = function(e) {
     addLogs(`Applying new generation time: ${applyAlives-calcGenerationTime}ms`);
     setTimeout(()=>{
         addLogs(`Painting time: ${new Date().getTime()-applyAlives}ms`);
+        $currentGeneration.innerText = `#${generations.length}`;
     },0);
 
 }
@@ -83,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function(){
     $grid.addEventListener('click', onCellClick, false);
     $logs = document.getElementById("logs");
 
+    $currentGeneration = document.getElementById('current-generation');
 });
 
 // TODO
@@ -97,6 +100,10 @@ function makeGenerationHash(generation) {
 }
 
 function makeNextGeneration(){
+    /* it will be flashing otherwise */
+    if (SIZE > 300) {
+        $currentGeneration.innerText = `working on generation #${generations.length+1}`;
+    }
     nextGenerationCalcWorker.postMessage({
         _currentGeneration: currentGeneration,
         _SIZE: SIZE,  
