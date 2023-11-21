@@ -3,7 +3,6 @@ let currentGeneration = [];
 
 let SIZE;
 let SIZEXSIZE;
-let AUTOGENERATION_INTERVAL;
 
 onmessage = function(e){
     const {_SIZE, _SIZEXSIZE, _currentGeneration } = e.data;
@@ -25,15 +24,18 @@ onmessage = function(e){
         nextAliveGenerations
     } = makeNextGeneration();
 
+    updateCellStatuses(nextAliveGenerations, nextDeadGenerations);
+    currentGeneration = nextAliveGenerations;
+
+    const hash = hashOfBooleanArray(cellStatuses);
     postMessage({
         log,
         nextDeadGenerations,
-        nextAliveGenerations
+        nextAliveGenerations,
+        hash
     });
 
-    // prepare for the next generation in background
-    updateCellStatuses(nextAliveGenerations, nextDeadGenerations);
-    currentGeneration = nextAliveGenerations;
+
 }
 
 function calcCellStatuses() {
@@ -145,4 +147,11 @@ function getIndex(x,y) {
 
     tInd = tY*SIZE+tX;
     return tInd;
+}
+
+
+function hashOfBooleanArray(array){
+    const chunks = array.map(e => e ? '1' : '0').join('').match(/.{1,16}/g);
+    const hash = chunks.map(chunk => String.fromCharCode(parseInt(chunk, 2))).join('');
+    return hash;
 }

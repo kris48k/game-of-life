@@ -30,7 +30,11 @@
     width: 70px;
 }
 
+.grid-container{
+    width: 100%;
+}
 #grid {    
+    margin: auto;   
 } 
 
 #grid div {

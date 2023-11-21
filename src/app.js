@@ -23,6 +23,8 @@ export default class App {
         this.initUIElements();
         this.generationManager = new GenerationManager();
         this.generationManager.addEventListener('new-generation', this.applyGeneration.bind(this));
+        this.generationManager.addEventListener('same-generation',this.onGenerationRepeated.bind(this));
+        this.generationManager.addEventListener('extinct-generation', this.onExtinct.bind(this));
     }
 
     initUIElements(){
@@ -48,8 +50,7 @@ export default class App {
 
     onBtnNextGenerationClick(){
         this.setUIState(2);
-    
-        this.generationManager.makeNextGeneration();
+        this.makeNextGeneration();
     }
 
     onBtnGenerateGridClick() {
@@ -65,7 +66,7 @@ export default class App {
         } else {
             this.setUIState(3);
             this.AUTOGENERATION_INTERVAL_ID = setInterval(()=>{
-                this.generationManager.makeNextGeneration();
+                this.makeNextGeneration();
             }, settings.AUTOGENERATION_INTERVAL);
         }
     }
@@ -107,11 +108,24 @@ export default class App {
         },0);
     }
 
+    onExtinct(){
+        this.setUIState(4);
+        this.endGame();
+        log(`<b>Game Over! The last generation fully extinct</b>`);
+    }
+
+    onGenerationRepeated(e){
+        this.setUIState(4);
+        this.endGame();
+        log(`<b>Game Over! The last generation is the same as generation #${e.detail}</b>`);
+    }
+
     /* 
         0 - beggining state
         1 - picking first generaton
         2 - choose next generation
         3 - autogeneration
+        4 - finish
     */
     setUIState(newUIState){
         this.UIState = newUIState;
@@ -123,23 +137,26 @@ export default class App {
                 this.ui.$btnAutogenerate.disabled = false;
                 break;
             }
-            case 3: {
-                this.ui.$btnGenerateRandom.disabled = true;
-                this.ui.$btnAutogenerate.innerText = "Stop Autogenerate";
-                this.ui.$btnNextGeneration.disabled = true;
-            }
             case 2: {
                 this.ui.$btnGenerateRandom.disabled = true;
                 this.ui.$btnAutogenerate.innerText = "Start Autogenerate";
                 this.ui.$btnNextGeneration.disabled = false;
+                break;
+            }
+            case 3: {
+                this.ui.$btnGenerateRandom.disabled = true;
+                this.ui.$btnAutogenerate.innerText = "Stop Autogenerate";
+                this.ui.$btnNextGeneration.disabled = true;
+                break;
+            }
+            case 4: {
+                this.ui.$btnGenerateGrid.disabled = true;
+                this.ui.$btnGenerateRandom.disabled = true;
+                this.ui.$btnNextGeneration.disabled = true;
+                this.ui.$btnAutogenerate.disabled = true;
+                break;
             }
         }
-    }
-
-    addLogs(message) {
-        const newElement = document.createElement('p');
-        newElement.innerHTML = message;
-        $logs.appendChild(newElement);
     }
 
     onCellClick(e){
@@ -159,10 +176,17 @@ export default class App {
         }
     }
 
+    makeNextGeneration(){
+        this.ui.$currentGenerationText.innerText = `${this.generationManager.currentGenerationNumber+1}...`;
+        log(`<b>Working on generation #${this.generationManager.currentGenerationNumber+1}.</b>`);
+        this.generationManager.makeNextGeneration();
+    }
+
     applyGeneration(){
+        const start = now();
+
         const newAlive = this.generationManager.currentGeneration.alive;
         const newDead = this.generationManager.currentGeneration.dead;
-        debugger;
         for (let i = 0; i < newAlive.length; i++) {
             this.makeAliveOrDead(newAlive[i], true);
         }
@@ -170,10 +194,19 @@ export default class App {
         for (let i = 0; i < newDead.length; i++) {
             this.makeAliveOrDead(newDead[i], false);
         }
+
+        const applicationTime = now();
+        log(`Applied new generation in ${applicationTime-start}ms.`);
+        setTimeout(()=>{
+            const paintedTime = now();
+            log(`Painted new generation in ${paintedTime-applicationTime}ms.`);
+            this.ui.$currentGenerationText.innerText = `${this.generationManager.currentGenerationNumber}`;
+        }, 0);
     }
 
     // TODO
     applyGenerationBathced(){
+        
         this.batchOperation((index)=>{
             this.makeAliveOrDead(this.newAlive[index], true);
         }, this.newAlive.length);
@@ -191,5 +224,9 @@ export default class App {
             this.ui.$grid.children[index].classList.remove('alive');
             this.ui.$grid.children[index].dataset.alive = false;
         }
+    }
+
+    endGame(){
+        clearInterval(this.AUTOGENERATION_INTERVAL_ID);
     }
 }

@@ -8,6 +8,7 @@ export default class GenerationManager extends EventTarget {
     currentGenerationNumber;
     SIZE = 0;
     SIZEXSIZE=0;
+    generationHashes={};
 
     constructor(){
         super();
@@ -24,6 +25,7 @@ export default class GenerationManager extends EventTarget {
     generateFirst(size){
         this.setSize(size);
         this.currentGeneration.generateRandom();
+        this.currentGenerationNumber=1;
     }
 
     makeNextGeneration(){
@@ -34,15 +36,35 @@ export default class GenerationManager extends EventTarget {
         });
     }
 
+    checkOnExtinction(nextAliveGenerations){
+        if (nextAliveGenerations.length === 0) {
+            this.dispatchEvent(new CustomEvent('extinct-generation'));
+        }
+    }
+
+    checkOnCycle(hash){
+        if (!this.generationHashes[hash]) {
+            this.generationHashes[hash] = this.currentGenerationNumber;
+        } else {
+            this.dispatchEvent(new CustomEvent('same-generation', {detail: this.generationHashes[hash]}));
+        }
+    }
+
     onWorkerMessage(event){
         const {            
             log,
             nextDeadGenerations,
-            nextAliveGenerations
+            nextAliveGenerations,
+            hash
         } = event.data;
+        console.log("hash", hash);
         this.currentGeneration = new Generation(this.SIZE,nextAliveGenerations,  nextDeadGenerations);
-        // todo push the hash here
         uiLog(log);
-        this.dispatchEvent(new Event('new-generation'));
+        this.dispatchEvent(new CustomEvent('new-generation'));
+
+        this.currentGenerationNumber++;
+        
+        this.checkOnExtinction(nextAliveGenerations);
+        this.checkOnCycle(hash);
     }
 }
