@@ -20,6 +20,7 @@ export default class GenerationManager extends EventTarget {
         this.SIZE = size;
         this.SIZEXSIZE = size*size;
         this.currentGeneration = new Generation(this.SIZE);
+        this.currentGenerationNumber=1;
     }
 
     generateFirst(size){
@@ -57,7 +58,6 @@ export default class GenerationManager extends EventTarget {
             nextAliveGenerations,
             hash
         } = event.data;
-        console.log("hash", hash);
         this.currentGeneration = new Generation(this.SIZE,nextAliveGenerations,  nextDeadGenerations);
         uiLog(log);
         this.dispatchEvent(new CustomEvent('new-generation'));

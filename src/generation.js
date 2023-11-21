@@ -18,27 +18,8 @@ export default class Generation {
         }
     }
 
-    // TODO move to utils
-    /**
-     * Separating in macro task several operations
-     * @param {(index)=>void} fn - Function that would be called with some index argument
-     * @param {number} length - max possible index that could be passed to fn
-     */
-    batchOperation(fn, length){
-        for(let i = 0; i < length; i+=settings.BATCH_OPERTION_SIZE) {
-            setTimeout((i)=>{
-                const maxLength = Max.min(length, i+settings.BATCH_OPERTION_SIZE);
-                for (let j = i; j<maxLength; j++) {
-                    fn.call(this, j);
-                }
-            }, 0, i);
-        }
-    }
-
-    // todo batch
     generateRandom(){
         const startTime = now();
-        const chunks = 10000;
         this.alive=[];
         this.dead=[];
 

@@ -1,5 +1,5 @@
 import GenerationManager from "./generationManager.js";
-import { log, now } from "./utils.js";
+import { batchCycleOperation, log, now } from "./utils.js";
 import { settings } from "./settings.js";
 
 export default class App {
@@ -54,9 +54,12 @@ export default class App {
     }
 
     onBtnGenerateGridClick() {
-        this.setUIState(1);
-        this.createGrid();
-        this.generationManager.setSize(this.SIZE);
+        this.setUIState(0.5);
+        setTimeout(()=> {
+            this.createGrid();
+            this.setUIState(1);
+            this.generationManager.setSize(this.SIZE);
+        }, 0);
     }
 
     onBtnAutoGenerateClick(){
@@ -72,39 +75,46 @@ export default class App {
     }
 
     onBtnGenerateRandomClick(){
+        this.setUIState(1.5)
         this.generationManager.generateFirst(this.SIZE);
         this.clearGrid();
         this.applyGeneration();
+        setTimeout(()=>{
+            this.setUIState(1);
+        }, 0)
     }
 
-    // TODO BAtching?
     createGrid(){
+
         this.SIZE =  parseInt(this.ui.$inputGridSize.value);
         if (this.SIZE < 5) {
             alert("Grid size should be >= 5");
             return;
         } 
         this.SIZEXSIZE = this.SIZE*this.SIZE; 
+        if (this.SIZE >= 800) {
+            settings.AUTOGENERATION_INTERVAL *= this.SIZE/500;
+        }
         
         const gridWidth = (20+2+2)*this.SIZE; // 20 is the width of the cell + 2+2 margins
         this.ui.$grid.style.width = `${gridWidth}px`;
 
-        const start = now();
+        const startTime = now();
         const buffer = [];
         for (let i = 0; i < this.SIZEXSIZE; i++) {
             buffer.push(`<div data-index=${i}></div>`);
         }
-        const endOfBufferMaking = now();
-        log(`Constructed grid in ${endOfBufferMaking-start}ms.`);
+        const endOfBufferMakingTime = now();
+        log(`Constructed grid in ${endOfBufferMakingTime-startTime}ms.`);
     
         this.ui.$grid.innerHTML = buffer.join('');
     
-        const endOfAddingToDom = now();
-        log(`Added grid to DOM in ${endOfAddingToDom-endOfBufferMaking}ms.`);
+        const endOfAddingToDomTime = now();
+        log(`Added grid to DOM in ${endOfAddingToDomTime-endOfBufferMakingTime}ms.`);
     
         setTimeout(()=>{
-            const endOfLayout = now();
-            log(`Layout for constructing grid done in ${endOfLayout - endOfAddingToDom}ms.`);
+            const endOfLayoutTime = now();
+            log(`Layout for constructing grid done in ${endOfLayoutTime - endOfAddingToDomTime}ms.`);
         },0);
     }
 
@@ -122,7 +132,9 @@ export default class App {
 
     /* 
         0 - beggining state
+        0.5 - long grid generating state
         1 - picking first generaton
+        1.5 - long random generation
         2 - choose next generation
         3 - autogeneration
         4 - finish
@@ -130,11 +142,21 @@ export default class App {
     setUIState(newUIState){
         this.UIState = newUIState;
         switch (newUIState) {
+            case 0.5: {
+                this.ui.$btnGenerateGrid.disabled = true;
+                this.ui.$currentGenerationText.innerText = "generating grid ...";
+                break;
+            }
             case 1: {
                 this.ui.$btnGenerateGrid.disabled = true;
                 this.ui.$btnGenerateRandom.disabled = false;
                 this.ui.$btnNextGeneration.disabled = false;
                 this.ui.$btnAutogenerate.disabled = false;
+                this.ui.$currentGenerationText.innerText = "";
+                break;
+            }
+            case 1.5: {
+                this.ui.$btnGenerateRandom.disabled = true;
                 break;
             }
             case 2: {
@@ -169,7 +191,6 @@ export default class App {
         this.makeAliveOrDead(i, !isAlive, true);
     }
 
-    // TODO batching
     clearGrid(){
         for (let i = 0; i < this.SIZEXSIZE; i++) {
             this.makeAliveOrDead(i, false);
@@ -204,16 +225,25 @@ export default class App {
         }, 0);
     }
 
-    // TODO
-    applyGenerationBathced(){
-        
-        this.batchOperation((index)=>{
-            this.makeAliveOrDead(this.newAlive[index], true);
-        }, this.newAlive.length);
+    // Not used. Leaving it here as an alternative way. 
+    // For some reason batch application and painting works for 30% slower.
+    // But smoother and doesn't cloge the main thread.
+    applyGenerationBatched(){
+        const startTime = now();
 
-        this.batchOperation((index)=>{
-            this.makeAliveOrDead(this.newDead[index], false);
-        }, this.newDead.length);
+        const newAlive = this.generationManager.currentGeneration.alive;
+        const newDead = this.generationManager.currentGeneration.dead;
+
+        batchCycleOperation((index)=>{
+            this.makeAliveOrDead(newDead[index], false);
+        }, newDead.length);
+        
+        batchCycleOperation((index)=>{
+            this.makeAliveOrDead(newAlive[index], true);
+        }, newAlive.length, ()=>{
+            const endTime = now();
+            log(`Generation applied and painted in ${endTime-startTime}ms`);
+        });
     }
 
     makeAliveOrDead(index, alive=true) {

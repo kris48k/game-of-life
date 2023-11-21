@@ -6,7 +6,7 @@ Pure JS implementation of [Game of Life](https://en.wikipedia.org/wiki/Conway%27
 Since the app uses Worker and modules, it need local web server to avoid CORS Issues. 
 0. Have node (of version 12.20 and higher) and npm [installed](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). 
 1. To install local simple web server, run: `npm i` from root of the project.
-2. Run `npm run dev`.
+2. Run `npm run dev` to run the local server.
 3. Visit http://127.0.0.1:8000 in the browser. Please open the app in modern browser so it supports modules and workers.
 
 # How to play
@@ -15,6 +15,7 @@ Since the app uses Worker and modules, it need local web server to avoid CORS Is
 3. You can either manually go through each generation step. For that press 'Next Generation' button. Or you can generate new generation each second, buy pressing "Autogenerate" button.
 4. You can always switch between manual and auto generation.
 5. On the left side you will see the logs: how long each iteration have taken.
+6. The game ends, when generation repeated, or all cells extinct.
 
 # Performance issues
 
@@ -47,12 +48,7 @@ The process of new generation making split into 3 steps:
    - Paint - 50% of the time,
    - Commit - 25% of the time.
 
-
-
-# whats left
-
-1. make auto generation making
-2. moving out random generation into worker
+4. To keep track and compare each generation, we store hash of a boolean array denoting each state of a cell by index. Then we split the string of binary numbers into chunks of 64digits, convert it to integer and pick up a char code corresponding that number. Glueing up all chars, we get a string corresponding to the generation state. For 1000x1000 grid, the length of the string could be of 62k characters. Hashes of all generations are stored as keys of associated map, so each generation we can quickly check if generation is repeated.
 
 # What else could be improved
 1. Paint only those areas, that are seen on the screen.
