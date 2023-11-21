@@ -7,7 +7,7 @@ Since the app uses Worker and modules, it need local web server to avoid CORS Is
 0. Have node (of version 12.20 and higher) and npm [installed](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm). 
 1. To install local simple web server, run: `npm i` from root of the project.
 2. Run `npm run dev`.
-3. Visit http://127.0.0.1:8000 in the browser.
+3. Visit http://127.0.0.1:8000 in the browser. Please open the app in modern browser so it supports modules and workers.
 
 # How to play
 1. Choose the size of the grid in the input. Then press button "Generate Grid".
@@ -18,7 +18,7 @@ Since the app uses Worker and modules, it need local web server to avoid CORS Is
 
 # Performance issues
 
-The bigger the Grid size, the longer it takes to make each generation step. All the measures further were made on 1000x1000 grid.
+The bigger the Grid size, the longer it takes to make each generation step. All the measures further are made on 1000x1000 grid.
 
 ## First time layout for 1000x1000 grid
 
@@ -53,7 +53,6 @@ The process of new generation making split into 3 steps:
 
 1. make auto generation making
 2. moving out random generation into worker
-3. buttons disable
 
 # What else could be improved
 1. Paint only those areas, that are seen on the screen.

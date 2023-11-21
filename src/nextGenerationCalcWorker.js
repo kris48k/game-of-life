@@ -1,13 +1,12 @@
 let cellStatuses = [];
 let currentGeneration = [];
 
-
 let SIZE;
 let SIZEXSIZE;
 let AUTOGENERATION_INTERVAL;
 
 onmessage = function(e){
-    const {_SIZE, _SIZEXSIZE, _currentGeneration, reset } = e.data;
+    const {_SIZE, _SIZEXSIZE, _currentGeneration } = e.data;
 
     SIZE = _SIZE;
     SIZEXSIZE = _SIZEXSIZE;
@@ -16,14 +15,14 @@ onmessage = function(e){
         currentGeneration = _currentGeneration;
     }
     
-    if (!cellStatuses || !cellStatuses.length || reset) {
+    if (!cellStatuses || !cellStatuses.length) {
         calcCellStatuses();
     }
 
     const {
-            log,
-            nextDeadGenerations,
-            nextAliveGenerations
+        log,
+        nextDeadGenerations,
+        nextAliveGenerations
     } = makeNextGeneration();
 
     postMessage({
@@ -32,6 +31,7 @@ onmessage = function(e){
         nextAliveGenerations
     });
 
+    // prepare for the next generation in background
     updateCellStatuses(nextAliveGenerations, nextDeadGenerations);
     currentGeneration = nextAliveGenerations;
 }
